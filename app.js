@@ -164,10 +164,7 @@ function addToLocalStorage(id, value) {
 
   //set up a variable which takes in the key (list) value pair in localStorage
   //if it is not there set up an empty array called list
-  let items = localStorage.getItem("list")
-    ? //parse turns it from a JSON string back to JS object
-      JSON.parse(localStorage.getItem("list"))
-    : [];
+  let items = getLocalStorage();
 
   //push into the array the invidual grocery item.
   items.push(grocery);
@@ -175,8 +172,30 @@ function addToLocalStorage(id, value) {
   console.log(items);
 }
 
-function removeFromLocalStorage(id) {}
+function removeFromLocalStorage(id) {
+  //empty array or array in localStorage
+  let items = getLocalStorage();
+  //creates a new array, without the one with the targetted id to be removed
+  items = items.filter(function (item) {
+    if (item.id !== id) {
+      //if there is no match - include it in the new list
+      return item;
+    }
+  });
+  //updated local Storage is created with the new array or (items) that made the cut
+  localStorage.setItem("list", JSON.stringify(items));
+}
 function editLocalStorage(id, value) {}
+
+//return from localStorage whatever you get
+//Ternary operator - if condition true? valueIfTrue : value if False
+function getLocalStorage() {
+  return localStorage.getItem("list")
+    ? JSON.parse(localStorage.getItem("list"))
+    : [];
+}
+
+//This get's whatever is returned from the addToLocalStorage func
 
 // JS object - const person = {
 // name: 'Laura';
