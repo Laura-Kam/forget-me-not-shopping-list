@@ -32,35 +32,7 @@ function addItem(e) {
   //if they have entered a value and not 'editing'
   //truthy or fasy values
   if (value !== "" && !editFlag) {
-    const element = document.createElement("article");
-    //add id
-    let attr = document.createAttribute("data-id");
-    attr.value = id;
-    element.setAttributeNode(attr);
-    //add class
-    element.classList.add("grocery-item");
-
-    element.innerHTML = `<p class="title">${value}</p>
-    <div class="btn-container">
-      <button type="button" class="edit-btn">
-        <i class="fas fa-edit"></i>
-      </button>
-      <button type="button" class="delete-btn">
-        <i class="fas fa-trash"></i>
-      </button>
-    </div>`;
-
-    //access to buttons like delete and edit, happen after list rendered dynamically.
-    //solution - could target parent OR target element itself instead of through document.getId etc
-
-    const deleteBtn = element.querySelector(".delete-btn");
-    const editBtn = element.querySelector(".edit-btn");
-
-    deleteBtn.addEventListener("click", deleteItem);
-    editBtn.addEventListener("click", editItem);
-
-    //append child
-    list.appendChild(element);
+    createListItem(id, value);
     displayAlert("item added to the list", "success");
     //show container
     container.classList.add("show-container");
@@ -97,9 +69,13 @@ function displayAlert(text, action) {
   }, 1000);
 }
 
+//load items when DOM loaded
+
+window.addEventListener("DOMContentLoaded", setupItems);
+
 //clear button
 
-// clearBtn.addEventListener("click", clearItems);???
+clearBtn.addEventListener("click", clearItems);
 
 function clearItems() {
   const items = document.querySelectorAll(".grocery-item");
@@ -185,7 +161,20 @@ function removeFromLocalStorage(id) {
   //updated local Storage is created with the new array or (items) that made the cut
   localStorage.setItem("list", JSON.stringify(items));
 }
-function editLocalStorage(id, value) {}
+function editLocalStorage(id, value) {
+  //get items or empty array depending
+  let items = getLocalStorage();
+  //returns new array and if targets the id of the item you
+  // target and creates the updated value
+  items = items.map(function (item) {
+    if (item.id === id) {
+      item.value = value;
+    }
+    return item;
+  });
+  //the updated array is then 'stringified' into JSON to local Storage.
+  localStorage.setItem("list", JSON.stringify(items));
+}
 
 //return from localStorage whatever you get
 //Ternary operator - if condition true? valueIfTrue : value if False
@@ -214,3 +203,45 @@ function getLocalStorage() {
 // console.log(banana);
 // localStorage.removeItem("banana");
 // ****** SETUP ITEMS **********
+
+function setupItems() {
+  let items = getLocalStorage();
+  if (items.length > 0) {
+    items.forEach(function (item) {
+      createListItem(item.id, item.value);
+    });
+    container.classList.add("show-container");
+  }
+}
+
+function createListItem(id, value) {
+  const element = document.createElement("article");
+  //add id
+  let attr = document.createAttribute("data-id");
+  attr.value = id;
+  element.setAttributeNode(attr);
+  //add class
+  element.classList.add("grocery-item");
+
+  element.innerHTML = `<p class="title">${value}</p>
+    <div class="btn-container">
+      <button type="button" class="edit-btn">
+        <i class="fas fa-edit"></i>
+      </button>
+      <button type="button" class="delete-btn">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>`;
+
+  //access to buttons like delete and edit, happen after list rendered dynamically.
+  //solution - could target parent OR target element itself instead of through document.getId etc
+
+  const deleteBtn = element.querySelector(".delete-btn");
+  const editBtn = element.querySelector(".edit-btn");
+
+  deleteBtn.addEventListener("click", deleteItem);
+  editBtn.addEventListener("click", editItem);
+
+  //append child
+  list.appendChild(element);
+}
